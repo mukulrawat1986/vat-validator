@@ -14,5 +14,11 @@ func main() {
 
 // Run is the function where all the action happens
 func Run(in string, out io.Writer) {
+	// countryCode, vatNumber := SplitVatNumber(in)
+}
 
+// SplitVatNumber splits the vat number into country code
+// and vat number.
+func SplitVatNumber(in string) (string, string) {
+	return "", ""
 }
