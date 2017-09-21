@@ -2,6 +2,9 @@ package main_test
 
 import (
 	"bytes"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/mukulrawat1986/vat-validator"
@@ -79,4 +82,55 @@ func Test_SplitVatNumber(t *testing.T) {
 		a.Equal(country, results[i*2])
 		a.Equal(vat, results[i*2+1])
 	}
+}
+
+// Test the Fetch function
+func Test_Fetch(t *testing.T) {
+	a := assert.New(t)
+
+	body := `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<soap:Body>
+		<checkVatResponse xmlns="urn:ec.europa.eu:taxud:vies:services:checkVat:types">
+			<countryCode>CZ</countryCode>
+			<vatNumber>28987373</vatNumber>
+			<requestDate>2017-09-21+02:00</requestDate>
+			<valid>true</valid>
+			<name>Critical works s.r.o.</name>
+			<address>Lovosická 711/30PRAHA 18 - LETŇANY190 00  PRAHA 9</address>
+		</checkVatResponse>
+	</soap:Body>
+</soap:Envelope>`
+
+	vq := main.VatRequest{}
+
+	vq.Body.CheckVat.Country = "CZ"
+	vq.Body.CheckVat.Vat = "28987373"
+
+	FakeServer(body, func() {
+		vr, err := main.Fetch(vq)
+		a.NoError(err)
+		a.Equal("CZ", vr.Body.CheckVatResponse.Country)
+		a.Equal("28987373", vr.Body.CheckVatResponse.Vat)
+		a.Equal("2017-09-21+02:00", vr.Body.CheckVatResponse.RequestDate)
+		a.Equal("true", vr.Body.CheckVatResponse.Valid)
+		a.Equal("Critical works s.r.o.", vr.Body.CheckVatResponse.Name)
+		a.Equal("Lovosická 711/30PRAHA 18 - LETŇANY190 00  PRAHA 9", vr.Body.CheckVatResponse.Address)
+	})
+
+}
+
+func FakeServer(b string, f func()) {
+	root := main.ApiRoot
+
+	ts := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		fmt.Fprint(res, b)
+	}))
+
+	defer ts.Close()
+
+	main.ApiRoot = ts.URL
+
+	f()
+
+	main.ApiRoot = root
 }
