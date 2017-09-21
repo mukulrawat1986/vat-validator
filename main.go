@@ -1,11 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"encoding/xml"
 	"flag"
+	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 )
+
+var ApiRoot = "http://ec.europa.eu/taxation_customs/vies/services/checkVatService"
 
 // VatRequest struct to store data to be sent as the request
 type VatRequest struct {
@@ -52,8 +58,7 @@ func Run(in string, out io.Writer) {
 	vq.Body.CheckVat.Vat = vatNumber
 
 	// send the VatRequest and receive the VatResponse
-	vr, err := Fetch(vq)
-
+	// vr, err := Fetch(vq)
 }
 
 // SplitVatNumber splits the vat number into country code
@@ -66,4 +71,28 @@ func SplitVatNumber(in string) (string, string) {
 // and returns a VatResponse object and error if any
 func Fetch(vq VatRequest) (VatResponse, error) {
 
+	vr := VatResponse{}
+
+	b, err := xml.Marshal(vq)
+	if err != nil {
+		return vr, fmt.Errorf("Error while marshalling our struct: %v", err)
+	}
+
+	body := bytes.NewBuffer(b)
+
+	// make the post request
+	resp, err := http.Post(ApiRoot, "text/xml", body)
+	if err != nil {
+		return vr, fmt.Errorf("Error while making post request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// read the response
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return vr, fmt.Errorf("Error while reading response body: %v", err)
+	}
+
+	xml.Unmarshal(data, &vr)
+	return vr, nil
 }
