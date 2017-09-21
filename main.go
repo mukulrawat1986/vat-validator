@@ -12,6 +12,25 @@ import (
 )
 
 var ApiRoot = "http://ec.europa.eu/taxation_customs/vies/services/checkVatService"
+var Version = "1.0.0"
+var Usage = func() {
+	fmt.Fprintf(os.Stderr, `
+Name:
+	vat-validation - A cli application to validate Vat Numbers.
+
+Usage:
+	vat-validation <Vat Number>
+
+EXAMPLE:
+	vat-validation CZ28987373
+
+VERSION:
+	%s
+
+COMMANDS:
+	help, h Shows a list of commands or help
+`, Version)
+}
 
 // VatRequest struct to store data to be sent as the request
 type VatRequest struct {
@@ -43,9 +62,23 @@ type VatResponse struct {
 }
 
 func main() {
+
+	version := flag.Bool("version", false, "display the version number")
+
+	flag.Usage = Usage
 	flag.Parse()
-	in := flag.Args()[0]
-	Run(in, os.Stdout)
+
+	if *version {
+		fmt.Printf("Version %s\n", Version)
+		os.Exit(1)
+	}
+
+	in := flag.Args()
+	if len(in) == 0 {
+		fmt.Fprintln(os.Stderr, "Error: Give a Vat Number in the arguments")
+		os.Exit(1)
+	}
+	Run(in[0], os.Stdout)
 }
 
 // Run is the function where all the action happens
