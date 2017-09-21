@@ -48,3 +48,35 @@ func Test_E2E(t *testing.T) {
 	}
 
 }
+
+// Test the SplitVatNumber function
+func Test_SplitVatNumber(t *testing.T) {
+	vatNumbers := []string{
+		"CZ28987373",
+		"DE296459264",
+		"DE292188391",
+		"SE556900620701",
+		"NL802465602B01",
+	}
+
+	results := []string{
+		"CZ",
+		"28987373",
+		"DE",
+		"296459264",
+		"DE",
+		"292188391",
+		"SE",
+		"556900620701",
+		"NL",
+		"802465602B01",
+	}
+
+	a := assert.New(t)
+
+	for i, number := range vatNumbers {
+		country, vat := main.SplitVatNumber(number)
+		a.Equal(country, results[i*2])
+		a.Equal(vat, results[i*2+1])
+	}
+}
