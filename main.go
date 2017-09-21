@@ -20,5 +20,5 @@ func Run(in string, out io.Writer) {
 // SplitVatNumber splits the vat number into country code
 // and vat number.
 func SplitVatNumber(in string) (string, string) {
-	return "", ""
+	return in[:2], in[2:]
 }
