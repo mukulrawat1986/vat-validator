@@ -29,3 +29,4 @@ After installing the dependencies run the test using `go test`
 ## Usage (example):
 
     ./vat-validator CZ28987373
+    Valid
