@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-// VatQuery struct to store data to be sent as the request
-type VatQuery struct {
+// VatRequest struct to store data to be sent as the request
+type VatRequest struct {
 	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
 	Header  string   `xml:"Header"`
 	Body    struct {
@@ -44,11 +44,26 @@ func main() {
 
 // Run is the function where all the action happens
 func Run(in string, out io.Writer) {
-	// countryCode, vatNumber := SplitVatNumber(in)
+	countryCode, vatNumber := SplitVatNumber(in)
+
+	// set up our request object
+	vq := VatRequest{}
+	vq.Body.CheckVat.Country = countryCode
+	vq.Body.CheckVat.Vat = vatNumber
+
+	// send the VatRequest and receive the VatResponse
+	vr, err := Fetch(vq)
+
 }
 
 // SplitVatNumber splits the vat number into country code
 // and vat number.
 func SplitVatNumber(in string) (string, string) {
 	return in[:2], in[2:]
+}
+
+// Fetch function makes the http post call and sends our VatRequest object
+// and returns a VatResponse object and error if any
+func Fetch(vq VatRequest) (VatResponse, error) {
+
 }
