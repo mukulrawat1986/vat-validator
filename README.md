@@ -24,6 +24,8 @@ This will then make the following packages available to you:
     github.com/stretchr/testify/mock
     github.com/stretchr/testify/http
 
+After installing the dependencies run the test using `go test`
+
 ## Usage (example):
 
     ./vat-validator CZ28987373
