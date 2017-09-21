@@ -58,7 +58,18 @@ func Run(in string, out io.Writer) {
 	vq.Body.CheckVat.Vat = vatNumber
 
 	// send the VatRequest and receive the VatResponse
-	// vr, err := Fetch(vq)
+	vr, err := Fetch(vq)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while fetching the data: %v\n", err)
+		os.Exit(1)
+	}
+
+	if vr.Body.CheckVatResponse.Valid == "true" {
+		fmt.Fprintln(out, "Valid")
+	} else {
+		fmt.Fprintln(out, "Invalid")
+	}
 }
 
 // SplitVatNumber splits the vat number into country code
